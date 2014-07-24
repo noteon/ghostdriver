@@ -1,7 +1,7 @@
 /*
 This file is part of the GhostDriver by Ivan De Marino <http://ivandemarino.me>.
 
-Copyright (c) 2012-2014, Ivan De Marino <http://ivandemarino.me>
+Copyright (c) 2014, Ivan De Marino <http://ivandemarino.me>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -40,10 +40,6 @@ ghostdriver.Session = function(desiredCapabilities) {
         LOG_TYPES           : {
             HAR                 : "har",
             BROWSER             : "browser"
-        },
-        PROXY_TYPES         : {
-            MANUAL              : "manual",
-            DIRECT              : "direct"
         }
     };
 
@@ -67,8 +63,8 @@ ghostdriver.Session = function(desiredCapabilities) {
         "acceptSslCerts" : false,           //< TODO
         "nativeEvents" : true,              //< TODO Only some commands are Native Events currently
         "proxy" : {                         //< TODO Support more proxy options - PhantomJS does allow setting from command line
-            "proxyType" : _const.PROXY_TYPES.DIRECT
-        },
+            "proxyType" : "direct"
+        }
     },
     _negotiatedCapabilities = {
         "browserName"               : _defaultCapabilities.browserName,
@@ -105,43 +101,14 @@ ghostdriver.Session = function(desiredCapabilities) {
     },
     _windows = {},  //< NOTE: windows are "webpage" in Phantom-dialect
     _currentWindowHandle = null,
-    _cookieJar = require('cookiejar').create(),
     _id = require("./third_party/uuid.js").v1(),
     _inputs = ghostdriver.Inputs(),
     _capsPageSettingsPref = "phantomjs.page.settings.",
     _capsPageCustomHeadersPref = "phantomjs.page.customHeaders.",
-    _capsPageSettingsProxyPref = "proxy",
     _pageSettings = {},
-    _additionalPageSettings = {
-        userName: null,
-        password: null
-    },
     _pageCustomHeaders = {},
     _log = ghostdriver.logger.create("Session [" + _id + "]"),
-    k, settingKey, headerKey, proxySettings;
-
-    var
-    /**
-     * Parses proxy JSON object and return proxy settings for phantom
-     *
-     * @param proxyCapability proxy JSON Object: @see https://code.google.com/p/selenium/wiki/DesiredCapabilities
-     */
-    _getProxySettingsFromCapabilities = function(proxyCapability) {
-        var proxySettings = {};
-        if (proxyCapability["proxyType"].toLowerCase() == _const.PROXY_TYPES.MANUAL) {      //< TODO: support other options
-            if (proxyCapability["httpProxy"] !== "null") {                                  //< TODO: support other proxy types
-                var urlParts = proxyCapability["httpProxy"].split(':');
-                proxySettings["ip"] = urlParts[0];
-                proxySettings["port"] = urlParts[1];
-                proxySettings["proxyType"] = "http";
-                proxySettings["user"] = "";
-                proxySettings["password"] = "";
-
-                return proxySettings;
-            }
-        }
-        return proxySettings;
-    };
+    k, settingKey, headerKey;
 
     // Searching for `phantomjs.settings.* and phantomjs.customHeaders.*` in the Desired Capabilities and merging with the Negotiated Capabilities
     // Possible values for settings: @see https://github.com/ariya/phantomjs/wiki/API-Reference#wiki-webpage-settings.
@@ -160,10 +127,6 @@ ghostdriver.Session = function(desiredCapabilities) {
                 _negotiatedCapabilities[k] = desiredCapabilities[k];
                 _pageCustomHeaders[headerKey] = desiredCapabilities[k];
             }
-        }
-        if (k.indexOf(_capsPageSettingsProxyPref) === 0) {
-            proxySettings = _getProxySettingsFromCapabilities(desiredCapabilities[k]);
-            phantom.setProxy(proxySettings["ip"], proxySettings["port"], proxySettings["proxyType"], proxySettings["user"], proxySettings["password"]);
         }
     }
 
@@ -321,12 +284,8 @@ ghostdriver.Session = function(desiredCapabilities) {
     _addNewPage = function(newPage) {
         _log.debug("_addNewPage");
 
-        // decorate the new Window/Page
-        newPage = _decorateNewWindow(newPage);
-        // set session-specific CookieJar
-        newPage.cookieJar = _cookieJar;
-        // store the Window/Page by WindowHandle
-        _windows[newPage.windowHandle] = newPage;
+        _decorateNewWindow(newPage);                //< decorate the new page
+        _windows[newPage.windowHandle] = newPage;   //< store the page/window
     },
 
     // Delete any closing page from the "_windows" container of this session
@@ -370,7 +329,7 @@ ghostdriver.Session = function(desiredCapabilities) {
         // 6. Applying Page settings received via capabilities
         for (k in _pageSettings) {
             // Apply setting only if really supported by PhantomJS
-            if (page.settings.hasOwnProperty(k) || _additionalPageSettings.hasOwnProperty(k)) {
+            if (page.settings.hasOwnProperty(k)) {
                 page.settings[k] = _pageSettings[k];
             }
         }
@@ -528,15 +487,10 @@ ghostdriver.Session = function(desiredCapabilities) {
 
         // Ensure a Current Window is available, if it's found to be `null`
         if (_currentWindowHandle === null) {
-            // Create the first Window/Page
-            page = require("webpage").create();
-            // Decorate it with listeners and helpers
-            page = _decorateNewWindow(page);
-            // set session-specific CookieJar
-            page.cookieJar = _cookieJar;
-            // Make the new Window, the Current Window
+            // First call to get the current window: need to create one
+            page = _decorateNewWindow(require("webpage").create());
+            phantom["__lb_initPage"](page);
             _currentWindowHandle = page.windowHandle;
-            // Store by WindowHandle
             _windows[_currentWindowHandle] = page;
         }
     },
@@ -663,9 +617,6 @@ ghostdriver.Session = function(desiredCapabilities) {
         for (k in _windows) {
             _closeWindow(k);
         }
-
-        // Release CookieJar resources
-        _cookieJar.close();
     },
 
     _getLog = function (type) {
@@ -736,3 +687,4 @@ ghostdriver.Session = function(desiredCapabilities) {
         getLogTypes: _getLogTypes
     };
 };
+
