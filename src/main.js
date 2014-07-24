@@ -47,8 +47,12 @@ ghostdriver.config = require("./config.js").get();
 
 // Enable "strict mode" for the 'parseURI' library
 require("./third_party/parseuri.js").options.strictMode = true;
-casper = require('casper').create();
-require("/home/ubuntu/loadbooster/vuser_runner/runner_utils.js");
+
+var loadboosterRoot=ghostdriver.system.env["LB_PRJ_HOME"];
+if(loadboosterRoot) {
+    casper = require('casper').create();
+    require(loadboosterRoot+"/vuser_runner/runner_utils.js");
+}
 
 if (casper.cli.has("wdport")){
     ghostdriver.config.port = parseInt(casper.cli.get("wdport")) || ghostdriver.config.port;

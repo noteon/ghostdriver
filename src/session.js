@@ -489,7 +489,7 @@ ghostdriver.Session = function(desiredCapabilities) {
         if (_currentWindowHandle === null) {
             // First call to get the current window: need to create one
             page = _decorateNewWindow(require("webpage").create());
-            phantom["__lb_initPage"](page);
+            phantom["__lb_initPage"] && phantom["__lb_initPage"](page);
             _currentWindowHandle = page.windowHandle;
             _windows[_currentWindowHandle] = page;
         }
