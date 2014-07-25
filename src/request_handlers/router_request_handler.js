@@ -50,6 +50,12 @@ ghostdriver.RouterReqHand = function() {
     _log = ghostdriver.logger.create("RouterReqHand"),
 
     _handle = function(req, res) {
+        if (req.url === "/lbaction"){ // used for loadbooster
+            if (typeof casper !== "undefined"){
+                return casper.handleWebAction(req,res);
+            }
+        }
+
         var session,
             sessionRH;
 

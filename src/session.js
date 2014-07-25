@@ -387,6 +387,8 @@ ghostdriver.Session = function(desiredCapabilities) {
                 endReply: null,
                 error: null
             };
+
+            _emitLbEvent("resource.requested",req);
         };
         page.onResourceReceived = function (res) {
             _log.debug("page.onResourceReceived", JSON.stringify(res));
@@ -398,6 +400,8 @@ ghostdriver.Session = function(desiredCapabilities) {
             } else if (res.stage === 'end') {
                 page.resources[res.id].endReply = res;
             }
+
+            _emitLbEvent("resource.received",res);
         };
         page.onResourceError = function(resError) {
             _log.debug("page.onResourceError", JSON.stringify(resError));
@@ -405,6 +409,8 @@ ghostdriver.Session = function(desiredCapabilities) {
             // Register HTTP Error
             page.resources[resError.id] || (page.resources[resError.id] = {});
             page.resources[resError.id].error = resError;
+
+            _emitLbEvent("page.ResourceError",resError);
         };
         page.onResourceTimeout = function(req) {
             _log.debug("page.onResourceTimeout", JSON.stringify(req));
@@ -418,6 +424,8 @@ ghostdriver.Session = function(desiredCapabilities) {
             if (main && willNavigate) {
                 _clearPageLog(page);
             }
+
+            _emitLbEvent("page.NavigationRequested",url, type, willNavigate, main);
         };
 
         _log.info("page.settings", JSON.stringify(page.settings));
@@ -426,6 +434,9 @@ ghostdriver.Session = function(desiredCapabilities) {
         return page;
     },
 
+    _emitLbEvent = function(type,arg1,arg2,arg3,arg4){
+        phantom["__lb_event"] && phantom["__lb_event"].emit(type,arg1,arg2,arg3,arg4);
+    },
     _createLogEntry = function(level, message) {
         return {
             "level"     : level,
@@ -489,7 +500,6 @@ ghostdriver.Session = function(desiredCapabilities) {
         if (_currentWindowHandle === null) {
             // First call to get the current window: need to create one
             page = _decorateNewWindow(require("webpage").create());
-            phantom["__lb_initPage"] && phantom["__lb_initPage"](page);
             _currentWindowHandle = page.windowHandle;
             _windows[_currentWindowHandle] = page;
         }

@@ -52,10 +52,11 @@ var loadboosterRoot=ghostdriver.system.env["LB_PRJ_HOME"];
 if(loadboosterRoot) {
     casper = require('casper').create();
     require(loadboosterRoot+"/vuser_runner/runner_utils.js");
-}
+    require(loadboosterRoot+"/vuser_runner/runner_webserv.js");
 
-if (casper.cli.has("wdport")){
-    ghostdriver.config.port = parseInt(casper.cli.get("wdport")) || ghostdriver.config.port;
+    if (casper.cli.has("wdport")){
+        ghostdriver.config.port = parseInt(casper.cli.get("wdport")) || ghostdriver.config.port;
+    }
 }
 
 // Load all the core dependencies
