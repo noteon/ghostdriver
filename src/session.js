@@ -375,6 +375,9 @@ ghostdriver.Session = function(desiredCapabilities) {
             page.startTime = new Date();
         });
         page.setOneShotCallback("onLoadFinished", function() {
+            if (page.settings)
+                page.settings.clearMemoryCaches = false; //add by qinghai
+
             page.endTime = new Date();
         });
         page.onResourceRequested = function (req) {
@@ -410,7 +413,7 @@ ghostdriver.Session = function(desiredCapabilities) {
             page.resources[resError.id] || (page.resources[resError.id] = {});
             page.resources[resError.id].error = resError;
 
-            _emitLbEvent("page.ResourceError",resError);
+            _emitLbEvent("resource.error",resError);
         };
         page.onResourceTimeout = function(req) {
             _log.debug("page.onResourceTimeout", JSON.stringify(req));
@@ -425,7 +428,7 @@ ghostdriver.Session = function(desiredCapabilities) {
                 _clearPageLog(page);
             }
 
-            _emitLbEvent("page.NavigationRequested",url, type, willNavigate, main);
+            _emitLbEvent("navigation.requested",url, type, willNavigate, main);
         };
 
         _log.info("page.settings", JSON.stringify(page.settings));
@@ -500,6 +503,22 @@ ghostdriver.Session = function(desiredCapabilities) {
         if (_currentWindowHandle === null) {
             // First call to get the current window: need to create one
             page = _decorateNewWindow(require("webpage").create());
+
+            if (typeof casper !=="undefined"){
+                for (k in casper.options.pageSettings) { //overide page settings
+                    // Apply setting only if really supported by PhantomJS
+                    if (page.settings.hasOwnProperty(k)) {
+                        page.settings[k] = casper.options.pageSettings[k];
+                    }
+                }
+
+                if (casper.options.viewportSize)
+                    page.viewportSize=casper.options.viewportSize;
+
+
+
+            }
+
             _currentWindowHandle = page.windowHandle;
             _windows[_currentWindowHandle] = page;
         }

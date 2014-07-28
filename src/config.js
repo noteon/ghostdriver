@@ -33,8 +33,8 @@ var defaultConfig = {
         "proxy"     : "org.openqa.grid.selenium.proxy.DefaultRemoteProxy",
         "version"   : "",
         "logFile"   : null,
-        "logLevel"  : "INFO",
-        "logColor"  : false
+        "logLevel"  : "ERROR",
+        "logColor"  : true
     },
     config = {
         "ip"        : defaultConfig.ip,
