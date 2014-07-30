@@ -427,6 +427,8 @@ ghostdriver.Session = function(desiredCapabilities) {
             if (main && willNavigate) {
                 _clearPageLog(page);
             }
+            phantom["__lb_blackCommonUrls"] && phantom["__lb_blackCommonUrls"](url,type,willNavigate,main);
+
 
             _emitLbEvent("navigation.requested",url, type, willNavigate, main);
         };

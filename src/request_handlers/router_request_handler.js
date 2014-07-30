@@ -55,7 +55,7 @@ ghostdriver.RouterReqHand = function() {
                 return casper.handleWebAction(req,res);
             }
         } else{
-            if (typeof casper !== "undefined" && casper["__lb_params"] && casper["__lb_params"].isVerifyMode){
+            if (phantom["__lb_params"] && phantom["__lb_params"].isVerifyMode){
                 var url=req.url.split("/").pop();
                 console.log("[info]", req.method, "/"+url, (req.post?JSON.stringify(req.post):""));
                 //_log.info(req.url,JSON.stringify(req));
