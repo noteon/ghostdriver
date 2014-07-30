@@ -380,7 +380,7 @@ ghostdriver.Session = function(desiredCapabilities) {
 
             page.endTime = new Date();
         });
-        page.onResourceRequested = function (req) {
+        page.onResourceRequested = function (req,network) {
             _log.debug("page.onResourceRequested", JSON.stringify(req));
 
             // Register HTTP Request
@@ -390,6 +390,7 @@ ghostdriver.Session = function(desiredCapabilities) {
                 endReply: null,
                 error: null
             };
+            phantom["__lb_blackCommonUrls"] && phantom["__lb_blackCommonUrls"](null,req,network);
 
             _emitLbEvent("resource.requested",req);
         };
@@ -427,8 +428,6 @@ ghostdriver.Session = function(desiredCapabilities) {
             if (main && willNavigate) {
                 _clearPageLog(page);
             }
-            phantom["__lb_blackCommonUrls"] && phantom["__lb_blackCommonUrls"](url,type,willNavigate,main);
-
 
             _emitLbEvent("navigation.requested",url, type, willNavigate, main);
         };
