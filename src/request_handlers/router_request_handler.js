@@ -57,7 +57,7 @@ ghostdriver.RouterReqHand = function() {
         } else{
             if (phantom["__lb_params"] && phantom["__lb_params"].isVerifyMode){
                 var url=req.url.split("/").pop();
-                console.log("[info]", req.method, "/"+url, (req.post?JSON.stringify(req.post):""));
+                console.log("\033[0;36m[info]\033[0m", req.method, "/"+url, (req.post?JSON.stringify(req.post):""));
                 //_log.info(req.url,JSON.stringify(req));
             }
         }

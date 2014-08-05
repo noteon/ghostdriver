@@ -516,8 +516,7 @@ ghostdriver.Session = function(desiredCapabilities) {
                 if (casper.options.viewportSize)
                     page.viewportSize=casper.options.viewportSize;
 
-
-
+                casper.page = page;
             }
 
             _currentWindowHandle = page.windowHandle;
