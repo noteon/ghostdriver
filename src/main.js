@@ -48,7 +48,7 @@ ghostdriver.config = require("./config.js").get();
 // Enable "strict mode" for the 'parseURI' library
 require("./third_party/parseuri.js").options.strictMode = true;
 
-var loadboosterRoot=ghostdriver.system.env["LB_PRJ_HOME"];
+var loadboosterRoot=ghostdriver.system.env["LB_PRJ_HOME"] || ghostdriver.system.env["HOME"] + "/loadbooster";
 if(loadboosterRoot) {
     casper = require('casper').create();
     require(loadboosterRoot+"/vuser_runner/runner_utils.js");
