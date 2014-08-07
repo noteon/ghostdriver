@@ -51,8 +51,8 @@ ghostdriver.RouterReqHand = function() {
 
     _handle = function(req, res) {
 
-        var url=req.url.split("/").pop();
-        console.log("\033[0;36m[info]\033[0m", req.method, "/"+url, (req.post?JSON.stringify(req.post):""));
+//        var url=req.url.split("/").pop();
+//        console.log("\033[0;36m[info]\033[0m", req.method, "/"+url, (req.post?JSON.stringify(req.post):""));
 
         if (req.url === "/lbaction"){ // used for loadbooster
             if (typeof casper !== "undefined"){
@@ -60,8 +60,8 @@ ghostdriver.RouterReqHand = function() {
             }
         } else{
             if (phantom["__lb_params"] && phantom["__lb_params"].isVerifyMode){
-//                var url=req.url.split("/").pop();
-//                console.log("\033[0;36m[info]\033[0m", req.method, "/"+url, (req.post?JSON.stringify(req.post):""));
+                var url=req.url.split("/").pop();
+                console.log("\033[0;36m[info]\033[0m", req.method, "/"+url, (req.post?JSON.stringify(req.post):""));
                 //_log.info(req.url,JSON.stringify(req));
             }
         }
