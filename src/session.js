@@ -355,6 +355,8 @@ ghostdriver.Session = function(desiredCapabilities) {
 
             // Register as part of the "browser" log
             page.browserLog.push(_createLogEntry("WARNING", errorMsg + "\n" + stack));
+
+            _emitLbEvent("error", errorMsg, errorStack); // emit casper error event
         };
 
         // 9. Log Page console messages
