@@ -392,7 +392,11 @@ ghostdriver.Session = function(desiredCapabilities) {
                 endReply: null,
                 error: null
             };
-            phantom["__lb_blackCommonUrls"] && phantom["__lb_blackCommonUrls"](null,req,network);
+            if (phantom["__lb_blackCommonUrls"] && phantom["__lb_blackCommonUrls"](req.url)){
+                    network.abort();
+
+                    return;
+            }
 
             _emitLbEvent("resource.requested",req);
         };
